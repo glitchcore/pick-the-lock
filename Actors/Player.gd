@@ -3,7 +3,7 @@ extends KinematicBody2D
 var velocity = Vector2.ZERO
 export var speed = Vector2(2000, 2000)
 export var gravity = 5000
-export var jump_amount = 5000
+export var jump_amount = 2000
 
 func _ready() -> void:
 	pass
@@ -27,19 +27,26 @@ func _physics_process(delta: float) -> void:
 			# check we are on the wall
 			# gravity_mask.rotated(PI/2)
 			
+			if get_slide_count() > 0:
+				var normal = -get_slide_collision(0).normal
+				var rotate_angle = gravity_mask.angle_to(normal)
+				gravity_mask = normal
+				rotate(rotate_angle)
 				
-			if is_on_wall() and not is_on_floor():
-				gravity_mask = gravity_mask.rotated(-PI/2)
-				rotate(-PI/2)
+				if abs(gravity_mask.x) > abs(gravity_mask.y):
+					ui_mask = Vector2(0, 1) 
+				else:
+					ui_mask = Vector2(1, 0)
 				
-			if is_on_ceiling():
-				gravity_mask = gravity_mask.rotated(PI)
-				rotate(PI)
-		
-	if abs(gravity_mask.x) > abs(gravity_mask.y):
-		ui_mask = Vector2(0, 1) 
-	else:
-		ui_mask = Vector2(1, 0)
+			# if is_on_wall() and not is_on_floor():
+				# gravity_mask = gravity_mask.rotated(-PI/2)
+				# rotate(-PI/2)
+				
+			# if is_on_ceiling():
+			#	gravity_mask = gravity_mask.rotated(PI)
+			#	rotate(PI)
+	
+	# rotate()
 	
 	# calculate ui movement
 	velocity = ((speed * ui_direction * ui_mask) +
