@@ -21,16 +21,20 @@ func _physics_process(delta: float) -> void:
 		- Input.get_action_strength("ui_up"))
 		
 	if (Time.get_ticks_msec() - last_rotate_t) > ROTATE_COOLDOWN:
-		last_rotate_t = Time.get_ticks_msec()
-		
-		# check we are on the wall
-		if is_on_wall():
-			gravity_mask = gravity_mask.rotated(-PI/2)
-			rotate(-PI/2)
+		if Input.is_action_just_pressed("jump"):
+			last_rotate_t = Time.get_ticks_msec()
 			
-		if is_on_ceiling():
-			gravity_mask = gravity_mask.rotated(PI)
-			rotate(PI)
+			# check we are on the wall
+			# gravity_mask.rotated(PI/2)
+			
+				
+			if is_on_wall() and not is_on_floor():
+				gravity_mask = gravity_mask.rotated(-PI/2)
+				rotate(-PI/2)
+				
+			if is_on_ceiling():
+				gravity_mask = gravity_mask.rotated(PI)
+				rotate(PI)
 		
 	if abs(gravity_mask.x) > abs(gravity_mask.y):
 		ui_mask = Vector2(0, 1) 
