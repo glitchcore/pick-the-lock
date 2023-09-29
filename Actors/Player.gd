@@ -25,20 +25,18 @@ func rotate_player():
 			gravity_mask = normal
 			rotate(rotate_angle)
 			
-			if abs(gravity_mask.x) > abs(gravity_mask.y):
-				ui_mask = Vector2(0, 1) 
-			else:
-				ui_mask = Vector2(1, 0)
+			ui_mask = gravity_mask.rotated(-PI/2)
 
 func calculate_ui_movement():
-	var ui_direction = Vector2.ZERO
-	ui_direction.x = (Input.get_action_strength("ui_right")
-		- Input.get_action_strength("ui_left"))
-	ui_direction.y = (Input.get_action_strength("ui_down")
-		- Input.get_action_strength("ui_up"))
+	var input = Input.get_axis("ui_left", "ui_right")
 	
-	velocity = ((speed * ui_direction * ui_mask) +
-		velocity * (Vector2.ONE - ui_mask))
+	#ui_direction.x = (Input.get_action_strength("ui_right")
+	#	- Input.get_action_strength("ui_left"))
+	#ui_direction.y = (Input.get_action_strength("ui_down")
+	#	- Input.get_action_strength("ui_up"))
+	
+	velocity = ((speed * input * ui_mask) +
+		velocity * Vector2(1 - abs(ui_mask.x), 1 - abs(ui_mask.y)))
 
 # calculate jump is anti-gravity action
 func calculate_jump():
