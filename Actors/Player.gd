@@ -1,15 +1,16 @@
 extends KinematicBody2D
 
 var velocity = Vector2.ZERO
-export var speed = Vector2(2000, 2000)
+export var speed = 1000
 export var gravity = 5000
 export var jump_amount = 2000
+export var acceleration = 8000
 
 func _ready() -> void:
 	pass
 
-var ui_mask = Vector2(1, 0)
-var gravity_mask = Vector2(0, 1)
+var slide_direction = Vector2(1, 0)
+var gravity_direction = Vector2(0, 1)
 var last_rotate_t = Time.get_ticks_msec()
 const ROTATE_COOLDOWN = 100
 
@@ -21,46 +22,48 @@ func rotate_player():
 			
 		if get_slide_count() > 0:
 			var normal = -get_slide_collision(0).normal
-			var rotate_angle = gravity_mask.angle_to(normal)
-			gravity_mask = normal
+			var rotate_angle = gravity_direction.angle_to(normal)
+			gravity_direction = normal
 			rotate(rotate_angle)
 			
-			ui_mask = gravity_mask.rotated(-PI/2)
+			slide_direction = gravity_direction.rotated(-PI/2)
 
-func calculate_ui_movement():
+func calculate_ui_movement(delta: float):
 	var input = Input.get_axis("ui_left", "ui_right")
+	input *= speed
 	
-	#ui_direction.x = (Input.get_action_strength("ui_right")
-	#	- Input.get_action_strength("ui_left"))
-	#ui_direction.y = (Input.get_action_strength("ui_down")
-	#	- Input.get_action_strength("ui_up"))
+	var slide_amount = 0
+	if abs(slide_direction.x) > abs(slide_direction.y):
+		slide_amount = slide_direction.x * velocity.x
+	else:
+		slide_amount = slide_direction.y * velocity.y
 	
-	velocity = ((speed * input * ui_mask) +
-		velocity * Vector2(1 - abs(ui_mask.x), 1 - abs(ui_mask.y)))
+	slide_amount = move_toward(slide_amount, input, delta * acceleration)
+	velocity = ((slide_amount * slide_direction) + velocity * gravity_direction.abs())
 
 # calculate jump is anti-gravity action
 func calculate_jump():
 	if Input.is_action_just_pressed("jump") and is_on_floor():
-		velocity += -gravity_mask * jump_amount
+		velocity += -gravity_direction * jump_amount
 		
 	# interrupted jump
 	if Input.is_action_just_released("jump"):
-		if abs(gravity_mask.x) > 0:
+		if abs(gravity_direction.x) > 0:
 			velocity.x = 0
-		if abs(gravity_mask.y) > 0:
+		if abs(gravity_direction.y) > 0:
 			velocity.y = 0
 
 func _physics_process(delta: float) -> void:
 	rotate_player()
-	calculate_ui_movement()
+	calculate_ui_movement(delta)
 	calculate_jump()
 	
 	# calculate gravity
-	velocity += gravity * gravity_mask * delta
+	velocity += gravity * gravity_direction * delta
 	
 	velocity = move_and_slide(
 		velocity,
-		-gravity_mask, # up dir
+		-gravity_direction, # up dir
 		false, # stop_on_slope
 		4, # max_slides
 		PI/4, # floor_max_angle
