@@ -60,4 +60,11 @@ func _physics_process(delta: float) -> void:
 	# calculate gravity
 	velocity += gravity * gravity_mask * delta
 	
-	velocity = move_and_slide(velocity, -gravity_mask)
+	velocity = move_and_slide(
+		velocity,
+		-gravity_mask, # up dir
+		false, # stop_on_slope
+		4, # max_slides
+		PI/4, # floor_max_angle
+		false # infinite_inertia
+	)
