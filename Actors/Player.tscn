@@ -20,6 +20,11 @@ position = Vector2( 1, 0 )
 shape = SubResource( 3 )
 
 [node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2( 1, 0 )
 current = true
+limit_left = -100
+limit_top = -100
+limit_right = 2100
+limit_bottom = 1300
 drag_margin_h_enabled = true
 drag_margin_v_enabled = true
