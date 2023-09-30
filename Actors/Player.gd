@@ -6,6 +6,8 @@ export var gravity = 5000
 export var jump_amount = 2000
 export var acceleration = 8000
 
+onready var timer = $ShakeTimer
+
 func _ready() -> void:
 	pass
 
@@ -61,6 +63,7 @@ func _physics_process(delta: float) -> void:
 	# calculate gravity
 	velocity += gravity * gravity_direction * delta
 	
+	var prev_velocity = velocity
 	velocity = move_and_slide(
 		velocity,
 		-gravity_direction, # up dir
@@ -69,3 +72,13 @@ func _physics_process(delta: float) -> void:
 		PI/4, # floor_max_angle
 		false # infinite_inertia
 	)
+	
+	var dv = (prev_velocity - velocity).length()
+	
+	if dv > gravity * delta * 2:
+		timer.set_wait_time(1)
+		timer.start()
+
+
+func _on_ShakeTimer_timeout() -> void:
+	print("time is over")
